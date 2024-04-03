@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.21
+ * @license AngularJS v1.3.22
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -54,7 +54,7 @@ function minErr(module, ErrorConstructor) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.3.21/' +
+    message = message + '\nhttp://errors.angularjs.org/1.3.22/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i - 2) + '=' +
@@ -2255,11 +2255,11 @@ function toDebugString(obj) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.3.21',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.3.22',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 3,
-  dot: 21,
-  codeName: 'v1.3.21'
+  dot: 22,
+  codeName: 'v1.3.22'
 };
 
 
@@ -7049,7 +7049,14 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
           // first check if there are spaces because it's not the same pattern
           var trimmedSrcset = trim(value);
           //                (   999x   ,|   999w   ,|   ,|,   )
-          var srcPattern = /(\s+\d+x\s*,|\s+\d+w\s*,|\s+,|,\s+)/;
+          /* 
+           * Used to be /(\s+\d+x\s*,|\s+\d+w\s*,|\s+,|,\s+)/
+           * We factorize the common parts of the first patterns (with spaces before the comma).
+           * The additional '\s*' after ',' changes the length of resulting strings wich are trimmed anyway,
+           * but it helps not matching both combinations when candidates have spaces before and after the comma.
+           * This reduces the split complexity to linear and avoid the ReDoS.
+           */
+          var srcPattern = /(\s+(?:\d+(?:x\s*|w\s*))?,\s*|,\s+)/;
           var pattern = /\s/.test(trimmedSrcset) ? srcPattern : /(,)/;
 
           // split srcset into tuple of uri and descriptor except for the last item
